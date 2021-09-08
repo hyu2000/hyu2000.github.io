@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>what is bot exploring</title>
+	<script type="text/javascript" src="wgo/wgo.js"></script>
+	<script type="text/javascript" src="wgo/kifu.js"></script>
+	<script type="text/javascript" src="wgo/sgfparser.js"></script>
+	<script type="text/javascript" src="wgo/player.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.component.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.infobox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.commentbox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.control.js"></script>
+	<script type="text/javascript" src="wgo/player.editable.js"></script>
+	<script type="text/javascript" src="wgo/scoremode.js"></script>
+	<script type="text/javascript" src="wgo/player.permalink.js"></script>
+	<link type="text/css" href="wgo/wgo.player.css" rel="stylesheet" />
+    <link type="text/css" href="scale.css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="mygo.css">
+</head>
+<body>
+<h2>5x5 Go: C2 opening and intricacies</h2>
+
+  <div id="C2opt" class="floatright"></div>
+
+  <p> Werf et al. have shown the optimal play sequence for C2 openings in 5x5 Go, shown to the right. Black wins by 3 points.
+  </p>
+  <p>
+      Starting from scratch, bot has quickly
+      learned that white should take C3 as the second move. As training progresses, it started exploring the optimal "cut" pattern
+      (C2-C3-D3-D2); at one point, it even estimated that the final score of this pattern is between 2~3.
+  </p>
+
+  <p class="floatcleared"></p>
+
+  <div id="C2bot" class="floatright"></div>
+
+  <p> But in the next iteration, it seemed to have lost interest in this pattern. It explored alternatives at move #4, whose
+      estimated score is -1. Clearly this outcome is more favorable to white, so it's reasonable that it would follow this
+      path instead of playing D2 in move #4.
+  </p>
+
+  <p class="floatcleared"></p>
+
+  <div id="C2correct" class="floatright"></div>
+  <p> This shows the complexity of Go, even on a 5x5 board. To the right we show the likely optimal move #5
+      for black (E2 is the key). Now black
+      is secure. White needs to worry about its own survival. Since it cannot play aggressive,
+      the result is at least B+3.
+  </p>
+
+  <p class="floatcleared">
+      This little exercise shows the challenge faced in Go training. It has no knowledge, at least not at this stage,
+      of life and death. Many board valuations might be off, some completely wrong.
+  </p>
+
+  <div id="C2interesting" class="floatright"></div>
+  <p> Just for fun, here is one interesting game the bot has found during self-play. White survives without a single eye; two
+      black blocks survive with one eye each. So we cannot just code up the conventional wisdom either. Self-play
+      ended there with the result of B+1, although the actual margin is a bit larger if black captures the two isolated
+      white stones.
+  </p>
+
+  <p class="floatcleared"></p>
+
+</body>
+
+<script type="text/javascript">
+var elem = document.getElementById("C2opt");
+var player = new WGo.BasicPlayer(elem, {
+    sgf: "(;SZ[5]RE[B+3]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[dd];B[de];W[bd];B[ed];W[cb];B[be];W[ad];B[db];W[ca];B[ab];W[bb];B[ce];W[ac];B[da];W[aa];B[ae];)",
+    move: 5,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+var elem = document.getElementById("C2bot");
+player = new WGo.BasicPlayer(elem, {
+    // C2 C3 D3 C4 D4 B2 D2 B3
+    sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[cb];B[db];W[bd];B[dd];W[bc];)",
+    move: 5,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+var elem = document.getElementById("C2correct");
+player = new WGo.BasicPlayer(elem, {
+    // C2 C3 D3 C4 E2(!) B2 B1 B3 D4
+    sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[cb];B[ed];W[bd];B[be];W[bc];B[db])",
+    move: 15,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+var elem = document.getElementById("C2interesting");
+player = new WGo.BasicPlayer(elem, {
+    sgfFile: "sgf/selfplay6-interesting.sgf",
+    move: 35,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+</script>
+</html>

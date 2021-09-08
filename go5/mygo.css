@@ -1,0 +1,7 @@
+	   .floatright {
+ 		  float: right;
+		  width: 300px;
+    	}
+		.floatcleared {
+		  clear: right;
+		}
