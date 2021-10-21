@@ -1,2 +1,5 @@
 # hyu2000.github.io
-blog
+My journey on AlphaGo experiments. First on 5x5 board:
+- [C2 Opening and intracacies](hyu2000.github.io/go5/model-evolution.html)
+
+More to come ...
