@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>what is bot exploring</title>
+    <title>5x5 Go: AlphaZero model evolution</title>
 	<script type="text/javascript" src="wgo/wgo.js"></script>
 	<script type="text/javascript" src="wgo/kifu.js"></script>
 	<script type="text/javascript" src="wgo/sgfparser.js"></script>
@@ -24,42 +24,61 @@
 
   <div id="C2opt" class="floatright"></div>
 
-  <p> Werf et al. have shown the optimal play sequence for C2 openings in 5x5 Go, shown to the right. Black wins by 3 points.
-  </p>
-  <p>
-      Starting from scratch, bot has quickly
-      learned that white should take C3 as the second move. As training progresses, it started exploring the optimal "cut" pattern
-      (C2-C3-D3-D2); at one point, it even estimated that the final score of this pattern is between 2~3.
-  </p>
+  <p> Werf et al. have <a href="http://erikvanderwerf.tengen.nl/5x5/5x5solved.html">solved</a> 5x5 Go with minimax search
+      (Alpha-Beta pruning).
+      The best opening for black is C3, with which it can easily win the entire board. For the more interesting openings,
+      for example,
+      C2, the best play sequence is shown to the right (use the left/right arrow buttons or keys to step through the game).
+      Black wins by 3 points.
+
+  <p> I am working on an AlphaZero style bot. The question is: can it find this optimal sequence by itself. Just for
+      background, even for 5x5 board, minimax search took about a day to finish, with all the optimizations they can
+      put in. It is hopeless for larger board sizes.
 
   <p class="floatcleared"></p>
 
   <div id="C2bot" class="floatright"></div>
+  <p>
+      Starting from scratch, my AlphaZero bot has quickly
+      learned that white should take C3 as the second move. As training progresses, it started exploring the "cut" pattern,
+      as seen in the optimal sequence (C2-C3-D3-D2). At one point, it even estimated that the final score of this pattern is
+      between 2~3 points.
+  </p>
 
-  <p> But in the next iteration, it seemed to have lost interest in this pattern. It explored alternatives at move #4, whose
-      estimated score is -1. Clearly this outcome is more favorable to white, so it's reasonable that it would follow this
-      path instead of playing D2 in move #4.
+  <p> However, in the next iteration, the bot seemed to have lost interest in this pattern. It explored alternatives at move #4,
+      for example, C4 (shown right), which leads to the final
+      estimated score around -1. Clearly this outcome is more favorable to white, so it's reasonable that it would follow this
+      path instead of playing D2 in move #4. Again, you can follow the self-played game by clicking the left/right arrow.
   </p>
 
   <p class="floatcleared"></p>
 
   <div id="C2correct" class="floatright"></div>
-  <p> This shows the complexity of Go, even on a 5x5 board. To the right we show the likely optimal move #5
-      for black (E2 is the key). Now black
+<!--PS: instead of E2, B2 is the best way for guaranteed black win.
+ -->
+  <p> Why did the bot deviate from the optimal play? What went wrong? This shows the complexity of Go, even on a 5x5
+      board. To the right we show the likely optimal move #5
+      for black (E2 is the key, rather than D4). Now black
       is secure. White needs to worry about its own survival. Since it cannot play aggressive,
-      the result is at least B+3.
+      the result is at least B+3 (Black winning by 3 points).
   </p>
 
-  <p class="floatcleared">
-      This little exercise shows the challenge faced in Go training. It has no knowledge, at least not at this stage,
-      of life and death. Many board valuations might be off, some completely wrong.
+  <p>
+      This little exercise shows the difficulty in AlphaGo training. The bot has no knowledge, at least not at this stage,
+      of life and death. Many of its board valuations might be off, some completely wrong. With more training, it might
+      find the optimal play.
   </p>
+
+  <p class="floatcleared"></p>
 
   <div id="C2interesting" class="floatright"></div>
-  <p> Just for fun, here is one interesting game the bot has found during self-play. White survives without a single eye; two
+  <p> Just for fun, we show here an interesting game the bot found during self-play. White survives without a single eye; two
       black blocks survive with one eye each. So we cannot just code up the conventional wisdom either. Self-play
       ended there with the result of B+1, although the actual margin is a bit larger if black captures the two isolated
       white stones.
+  </p>
+  <p> This game feels a bit alien-like. But the principle is widely applicable, just that it is more relevant for
+      5x5 board than for bigger boards.
   </p>
 
   <p class="floatcleared"></p>
@@ -82,7 +101,7 @@ var elem = document.getElementById("C2bot");
 player = new WGo.BasicPlayer(elem, {
     // C2 C3 D3 C4 D4 B2 D2 B3
     sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[cb];B[db];W[bd];B[dd];W[bc];)",
-    move: 5,
+    move: 4,
 	layout: { // you can use static or dynamic layout
         right: ['InfoBox', 'CommentBox'],
         top: ['Control']
