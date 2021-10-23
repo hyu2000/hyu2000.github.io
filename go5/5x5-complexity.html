@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>5x5 Go: Complexities</title>
+	<script type="text/javascript" src="wgo/wgo.js"></script>
+	<script type="text/javascript" src="wgo/kifu.js"></script>
+	<script type="text/javascript" src="wgo/sgfparser.js"></script>
+	<script type="text/javascript" src="wgo/player.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.component.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.infobox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.commentbox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.control.js"></script>
+	<script type="text/javascript" src="wgo/player.editable.js"></script>
+	<script type="text/javascript" src="wgo/scoremode.js"></script>
+	<script type="text/javascript" src="wgo/player.permalink.js"></script>
+	<link type="text/css" href="wgo/wgo.player.css" rel="stylesheet" />
+    <link type="text/css" href="scale.css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="mygo.css">
+</head>
+<body>
+<h2>5x5 Go: easy-peasy?</h2>
+
+  <div id="C2opt" class="floatright"></div>
+
+<p>
+The size of a regular Go board is 19 by 19. It's well known that the number of possible board states is
+more than that of atoms in the universe. That's why AlphaGo is hailed as a major breakthrough.
+But how hard can it be, if we play on a 5x5 board?
+</p>
+
+<p>
+Let's do some math. 25 positions on the board, each can be either empty, black, or white.
+<p>
+    3**25=847 billion! Surprisingly large.
+<p>
+Okay, not all of them are legal.
+
+The more precise number (of legal board configurations) is <a href="https://tromp.github.io/go/legal.html"> 414 billions</a>, 414,295,148,741 to be exact.
+
+<p>
+We can reduce that number using symmetries: rotation, flip. This leads to a total of 8 combinations. But with even a 100-fold reduction, it's still four cool billions.
+</p>
+
+<h2>Search tree and reasonable openings</h2>
+Both AlphaGo (MCTS) and minimax are essentially building a tree to search through that huge space of possibilities.
+It starts from opening moves.
+<p>
+If you play a couple 5x5 Go games, you will quickly appreciate that C3 opening is likely the winner (indeed it is).
+
+Taking into account symmetries, there are really 5 other openings. Since A1/B1/C1 looks odd (to me at least), that leaves us just C2 and B2.
+
+We can push the symmetry argument a bit further, but that complicates implementation. We need to jump through
+quite some hoops. And it's simply not clear how to enforce symmetry with neural networks.
+<p>
+If we restrict ourselves to C3/C2/B2 openings, and some common sense (like not go on 1-line unless necessary),
+the search tree might be manageable, since the most interesting part of the game is likely within the first
+10 moves. By that time the game has taken a certain shape, and it may <em>seem</em> straightforward to solve for the rest of the game.
+<p>
+But is it true? The issue of life and death looms large in endgames. Dead-stone removal is in fact far from trivial.
+There is only one algorithm to check for pass-alive area, which is used by KataGo and others to speed up end-games.
+
+
+<h2>C2 opening: best play and variations</h2>
+<p>
+According to <a href="http://erikvanderwerf.tengen.nl/5x5/5x5solved.html">Werf, et al</a>, the best play for C2 opening is:
+  C2 C3 D3 D2 D1 B2 E2 C4. It's shown above. Click the arrow button or use left/right key to step through the game.
+Black wins by 3 points.
+<p>
+I trained my AlphaZero bot on this particular opening. In the process I learned of the complexity of the game
+beyond my expectation.
+
+<p class="floatcleared"></p>
+
+<h3>Move #6: E2 variation</h3>
+<div id="C2botE2" class="floatright"></div>
+
+<p>
+During self-play runs, bot has found this opening instead:
+  C2 C3 D3 D2 D1 E2 (white plays E2 to avoid capture, shown on the right)
+
+and strongly likes it. Most of them lead to a black win.
+
+<p>
+This doesn't make sense at all. The white stone cannot be saved. What's the bot thinking? Is it just one of the intermediate stages
+(read: <em>suboptimal</em>) before it masters the C2 opening?
+
+<p class="floatcleared"></p>
+
+<h3>My first speculation</h3>
+
+<div id="E2myplay1" class="floatright"></div>
+
+<p>
+Looking at how black would respond to this E2 move, it's actually not straightforward at all.
+<p>
+The best response <em>I think</em> is:
+  E3(threat) B2(threat) E1(take) C4 D4 D5(disallow eye) B4 B5 B3(threat) C5(save) E5(threat) E4(ko) B1(threat) A2(extend)
+  E5(ko).  White lost in a ko fight!
+<p>
+As an alternative, if white doesn't go aggressive in D5, it can survive (e.g. A4), but with a loss, as expected.
+
+<p class="floatcleared"></p>
+
+<h3>and how they are wrong!</h3>
+
+<div id="E2botplay1" class="floatright"></div>
+<p>
+When I play (black) on this variation against my bot, white aggression at D5 seems to hold.
+It responds with B3 when I attack at B4. And no matter what I try, white wins!
+</p>
+
+<p class="floatcleared"></p>
+
+<h3>My second speculation</h3>
+<div id="E2myplay2" class="floatright"></div>
+<p>
+I tried another black response to white's E2 move:
+  E3 B2 E1 C4 D4 D5(disallow eye) B1(*) B3(protect) A4(fight)
+ which will likely result in black win on territory, but not pass-alive.
+</p>
+
+<p class="floatcleared"></p>
+<div id="E2myplaybot" class="floatright"></div>
+
+<p>
+Interestingly, when I played this sequence against my AZ bot, it chose a different route: after black B1,
+bot played white A2, which seems to result in a white win again!
+  E3 B2 E1 C4 D4 D5(disallow eye) B1 A2(*)
+
+<p class="floatcleared"></p>
+
+<h3> Bot's actual (and better) response to E2</h3>
+<div id="E2bot" class="floatright"></div>
+<a>
+I scratched my head for quite some time. Then it dawns on me that bot must have explored this already. Lo and behold,
+here is what the bot has determined:
+
+Looks like when white plays E2(extend), C4(threat) B3(extend) B2 D4 B4(threat) A3(extend) A2(threat) E3(take)
+which leads to the <a href="https://hyu2000.github.io/go5/model-evolution.html">alien shape</a> and a black win.
+
+  <p class="floatcleared"></p>
+
+<p>
+There are other interesting scenarios. The nice thing about 5x5 board is that you don't waste too much time :)
+These mind-boggling puzzles are probably better left for bots to solve.
+
+<!--
+<h2>others </h2>
+Another scenario that I noted a while back. This is not on the best path. Bot spent quite some time on C2 C3 D3 C4
+opening, thinking that white would win by 1 point. Turns out this is the right response:
+  C2 C3 D3 C4 E2(!) B2 B1 B3 D4
+white has to be careful for its own survival now. So this is at least B+3. [model-evolution]
+
+  <p class="floatcleared"></p>
+-->
+
+</body>
+
+<script type="text/javascript">
+// ;B[];W[];B[];W[];B[];W[];B[];W[]
+
+var elem = document.getElementById("C2opt");
+var player = new WGo.BasicPlayer(elem, {
+    sgf: "(;SZ[5]RE[B+3]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[dd];B[de];W[bd];B[ed];W[cb];B[be];W[ad];B[db];W[ca];B[ab];W[bb];B[ce];W[ac];B[da];W[aa];B[ae];)",
+    move: 7,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+var elem = document.getElementById("C2botE2");
+player = new WGo.BasicPlayer(elem, {
+    // C2 C3 D3 D2 D1 E2(extend) C4 B3
+    sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[dd];B[de];W[ed];B[cb];W[bc];)",
+    move: 6,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+var elem = document.getElementById("E2myplay1");
+player = new WGo.BasicPlayer(elem, {
+    // E3(threat) B2(threat) E1(take) C4 D4 D5(disallow eye) B4 B5 B3(threat) C5(save) E5(threat) E4(ko) B1(threat) A2(extend) E5(ko)
+    sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[dd];B[de];W[ed];B[ec];W[bd];B[ee]C[take];W[cb];B[db];W[da]C[agg];B[bb];W[ba];B[bc];W[ca];B[ea];W[eb];B[be];W[ad];B[ea];)",
+    move: 8,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+var elem = document.getElementById("E2botplay1");
+player = new WGo.BasicPlayer(elem, {
+    // E3(threat) B2(threat) E1(take) C4 D4 D5(disallow eye) B4 B5 B3(threat) C5(save) E5(threat) E4(ko) B1(threat) A2(extend) E5(ko)
+    sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[dd];B[de];W[ed];B[ec];W[bd];B[ee]C[take];W[cb];B[db];W[da]C[agg];B[bb];W[bc];)",
+    move: 14,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+var elem = document.getElementById("E2myplay2");
+player = new WGo.BasicPlayer(elem, {
+    // E3 B2 E1 C4 D4 D5(disallow eye) B1(*) B3(protect) A4(fight)
+    sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[dd];B[de];W[ed];B[ec];W[bd];B[ee]C[take];W[cb];B[db];W[da]C[agg]; B[be];W[bc];B[ab];",
+    move: 15,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+var elem = document.getElementById("E2bot");
+player = new WGo.BasicPlayer(elem, {
+    // E2(extend), C4(threat) B3(extend) B2 D4 B4(threat) A3(extend) A2(threat) E3(take)
+    sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[dd];B[de];W[ed];B[cb];W[bc]C[#8];B[bd];W[db];B[bb];W[ac];B[ad];W[ec]C[take];B[ab];)",
+    move: 8,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+</script>
+</html>
