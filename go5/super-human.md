@@ -20,11 +20,12 @@ one for Tic-tac-toe. The only difference is computational complexity.
 
 Even 5x5 Go is surprisingly challenging, for details, check out [this post](https://hyu2000.github.io/go5/5x5-complexity.html).
 
-But just as in 5x5 Go, the game outcome is pretty much determined before you even put the first stone on the board.
-The values for opening moves on 5x5 board is shown here ![5x5 value board](/go5/go5-value.png)
+But just as in Tic-tac-toe, the game outcome is pretty much determined before you even put the first stone on the board.
+Here is the true values for opening moves on a 5x5 board 
+![5x5 value board](/go5/go5-value.png)
 
-Unfortunately, we haven't produced the same figure for the 19x19 board yet. But still, if you have the alien 
-foresight (or pre-science, as they called it in Dune), you will likely have a very different take on the game.
+Unfortunately, we don't have the same figure for the 19x19 board. But still, if you have the alien 
+foresight (or as they call it in Dune, pre-science), you will likely have a very different take on the game.
 
 Now, where does AlphaGo fit in this view? Is it still pathetically searching in the dark?
 
