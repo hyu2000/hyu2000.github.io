@@ -42,7 +42,7 @@ As AlphaGo team and several others showed, the bot kept getting stronger and str
 After it got past human-level performance, we lost interest at some point and had to pull the plug.
 
 On a more technical level, with the same neural network architecture, AlphaGo's performance will likely saturate at some
-point. Then we add more parameters (more blocks), to give it room for improvement.
+point. Then we add more parameters (more blocks/filters), to give it room for improvement.
 
 ## So, you want to beat AlphaGo...
 Well, you have several options. One is to keep training on top of the latest AlphaGo model for several more 
