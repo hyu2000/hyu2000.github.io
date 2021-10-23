@@ -21,8 +21,7 @@ one for Tic-tac-toe. The only difference is computational complexity.
 Even 5x5 Go is surprisingly challenging, for details, check out [this post](https://hyu2000.github.io/go5/5x5-complexity.html).
 
 But just as in 5x5 Go, the game outcome is pretty much determined before you even put the first stone on the board.
-The values for opening moves on 5x5 board is shown here 
-<img src="go5/go5-value.jpg" alt="go5-value" width="200"/>
+The values for opening moves on 5x5 board is shown here ![5x5 value board](/go5/go5-value.png)
 
 Unfortunately, we haven't produced the same figure for the 19x19 board yet. But still, if you have the alien 
 foresight (or pre-science, as they called it in Dune), you will likely have a very different take on the game.
