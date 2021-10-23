@@ -9,7 +9,7 @@ If you follow the papers on AlphaGo from DeepMind, there are actually only three
 and AlphaZero (There is also MuZero, but that's not about Go anymore). 
 The bot did get stronger and stronger, as more experiments were conducted and algorithm improved.
 
-It's true that human mind is no match for the bot now (I would not attempt that personally). But in terms of Go, 
+It's true that human brain is no match for the bot now (I would not attempt that personally). But in terms of Go, 
 what has the bot really achieved?
 
 
