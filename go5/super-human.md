@@ -33,8 +33,8 @@ kids went to Go schools to learn the trade. Major international Go touraments we
 pride. Looking back, that feels like stone age.
 
 With AlphaGo, we are at the super-human level. But don't let that title fool you. Imagine an alien civilization,
-either with better computing device, or superior reasoning, has figured out the minimax value of 19x19 Go, 
-to them, AlphaGo would look like a bot in the dark ages.
+either with better computing device, or superior reasoning, has figured out the minimax value of 19x19 Go. 
+To them, AlphaGo would look like a bot in dark ages.
 
 ## Ever improving performance in AlphaGo
 [AZ Elo vs #iterations]
