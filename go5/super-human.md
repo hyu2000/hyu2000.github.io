@@ -29,7 +29,7 @@ foresight (or pre-science, as they called it in Dune), you will likely have a ve
 Now, where does AlphaGo fit in this view? Is it still pathetically searching in the dark?
 
 Before the bot arrived, Go was the domain of human experts. Many books were written on strategies and tactics;
-kids went to Go schools to learn the trade. Major international Go competitions became a matter of national
+kids went to Go schools to learn the trade. Major international Go touraments were a matter of national
 pride. Looking back, that feels like stone age.
 
 With AlphaGo, we are at the super-human level. But don't let that title fool you. Imagine an alien civilization,
