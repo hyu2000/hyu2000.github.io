@@ -137,8 +137,12 @@ bot played white A2, which seems to result in a white win again!
 I scratched my head for quite some time. Then it dawns on me that bot must have explored this already. Lo and behold,
 here is what the bot has determined:
 
-Looks like when white plays E2(extend), C4(threat) B3(extend) B2 D4 B4(threat) A3(extend) A2(threat) E3(take)
-which leads to the <a href="https://hyu2000.github.io/go5/model-evolution.html">alien shape</a> and a black win.
+when white plays E2(extend), C4(threat) B3(extend) B2 D4 B4(threat) A3(extend) A2(threat) E3(take)
+which leads to the <a href="https://hyu2000.github.io/go5/model-evolution.html">alien shape</a>.
+Black wins by more than 3 points.
+
+<p>
+For this reason, white move #6 at E2 is not on the optimal path.
 
   <p class="floatcleared"></p>
 
@@ -223,7 +227,7 @@ player.setCoordinates(true);
 var elem = document.getElementById("E2bot");
 player = new WGo.BasicPlayer(elem, {
     // E2(extend), C4(threat) B3(extend) B2 D4 B4(threat) A3(extend) A2(threat) E3(take)
-    sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[dd];B[de];W[ed];B[cb];W[bc]C[#8];B[bd];W[db];B[bb];W[ac];B[ad];W[ec]C[take];B[ab];)",
+    sgf: "(;SZ[5]PB[Black]PW[White]RE[B+3];B[cd];W[cc];B[dc];W[dd];B[de];W[ed];B[cb];W[bc]C[#8];B[bd];W[db];B[bb];W[ac];B[ad];W[ec]C[take];B[ab];W[dc];B[da];W[ca];B[ba];W[ce];B[be];W[eb];)",
     move: 8,
 	layout: { // you can use static or dynamic layout
         right: ['InfoBox', 'CommentBox'],
