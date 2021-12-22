@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>training AZ bot to solve endgames</title>
+	<script type="text/javascript" src="wgo/wgo.js"></script>
+	<script type="text/javascript" src="wgo/kifu.js"></script>
+	<script type="text/javascript" src="wgo/sgfparser.js"></script>
+	<script type="text/javascript" src="wgo/player.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.component.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.infobox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.commentbox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.control.js"></script>
+	<script type="text/javascript" src="wgo/player.editable.js"></script>
+	<script type="text/javascript" src="wgo/scoremode.js"></script>
+	<script type="text/javascript" src="wgo/player.permalink.js"></script>
+	<link type="text/css" href="wgo/wgo.player.css" rel="stylesheet" />
+    <link type="text/css" href="scale.css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="mygo.css">
+</head>
+<body>
+<h2>Training bot to solve endgames</h2>
+
+<p>
+Since it takes a long time for me to train full scale AlphaZero (AZ) on 9x9 board, I decided to switch to an easier
+task: train a bot to play just endgames. I downloaded some dataset of 9x9 games played by professional (or relatively
+good amateur players). One thing about human games is that they like to end games early: when they think there is
+no way of winning, they would resign rather than fight tooth-and-nail to the end. So while all 2000 games 
+have winners declared, they end at different stages: some finished with a clear border between white and black; 
+others finished quite early, leaving open many possibilities.
+
+<p>
+This gives me a good dataset to test whether my bot can learn to play these endgames correctly. The advantage is
+two-fold. First, computational-wise, instead of playing an entire game, I only need to play a portion of it.
+Second, it's a labelled dataset where the progress of AZ training can be easily measured.
+
+<h3>Scoring is non-trivial in Go: Tromp-Taylor rules</h3>
+<div id="game-seki" class="floatright"></div>
+<p>
+Scoring in Go is an unusually tricky subject. For human games, there are Chinese rules, Japanese rules and others.
+They mostly give the same result. However, they cannot be easily automated because there is one step, dead stone removal,
+that needs human intervention. Even amateurs don't play games all the way to the end. When both sides pass, there
+are generally some dead stones on the board. So before we can count the territories, black and white needs to agree
+on which stones are dead. For humans, it's a simple matter. For computers, not even close. How does it know that
+those white stones in the black territory is dead?
+
+<p>
+<a href="https://senseis.xmp.net/?Seki"> Seki</a> complicates things even further. To the right we show an example of Seki
+in the top-right corner. The three white stones are alive together with the surrounding black stones, since no one
+can capture the other. (Later in this game, black incorrectly filled one of the eyes in move #57. White could kill off the
+black chain, but apparently it hasn't learned how to do it. By Tromp scoring it's still technically a "seki".)
+
+<p>
+The question of life and death looms large in scoring. AZ (and most bots) adopted the simple approach of
+ <a href="http://tromp.github.io/go.html">Tromp-Taylor scoring</a>, which basically sidesteps dead-stone removal issue.
+In this scoring, any stone on the board is counted. How does this reconcile with human scoring? Well,
+it's on the bot to play each game all the way to the end, to remove all dead enemy stones before it puts up its hand
+and says pass.
+
+<p>
+Needless to say, this will make bot games go a lot longer than humans care. The bot may even learn to put
+a stone in the enemy territory, just to boost its Tromp score. (It would later also learn that this is just
+frivolous, but only after a while). These are all part of the endgame that a good bot needs to solve.
+
+<p>
+Fortunately, we can alleviate a small part of the pain by using Benson's algorithm.
+
+<p class="floatcleared"></p>
+
+
+<h3>Benson's algorithm</h3>
+
+  <div id="game-duration" class="floatright"></div>
+
+<p>
+ Benson's work on <a href="https://senseis.xmp.net/?BensonsAlgorithm">unconditional life</a> is likely the only proven
+theorem on life and death in Go. His algorithm finds pass-alive chains, i.e. even if you keep passing, enemy
+cannot capture those stones (hence unconditional life). Being an algorithm, it can be implemented to the letter.
+
+<p>
+The better known "two-eye-formation" is not as useful in computer Go, since it's not always easy
+to tell a true eye from a false eye. It is more of a human-friendly concept that comes with nuances that only humans
+understand.
+
+<p>
+With Benson's algorithm, we can shorten endgames by establishing pass-alive areas and treating enemy stones therein
+as dead stones. It helps, but only to an extent, as live chains are not necessarily unconditional alive.
+
+<p>
+To the right is an example of how Benson's algorithm can help.
+In this game, human stopped at move <input type="button" value="#48" onclick="goto(48)"/>,
+as the board is pretty much settled, with a dead black stone in top-right.
+From this point on, my bot took over and tried to determine the final score:
+<ul>
+<li> At move <input type="button" value="#75" onclick="goto(75)"/>,
+    Benson's algorithm determines score is final, even though some dead stones existed.
+<li> At move <input type="button" value="#91" onclick="goto(91)"/>,
+    Tromp score cannot possibly change anymore (if they don't commit suicide)
+<li> Black and white kept filling up their own eyes until pass-pass at move <input type="button" value="#101" onclick="goto(101)"/>
+</ul>
+It's surprising how much effort bot needs to do to finish a "boring" endgame.
+
+<p>
+One can spend more time on better heuristics for dead stone removal, but they are very error-prone. AZ didn't even
+use Benson's algorithm, since the bot will eventually learn all these by itself, given enough time.
+The benefit of Benson's algorithm is mainly to save on computation and to speed up self-play.
+
+<p class="floatcleared"></p>
+
+<h3>Experiment Result</h3>
+
+<p>
+The dataset has 2000 games with human labels. My initial model, which was trained on selfplay games for a while,
+labelled 85% of the games correctly (in terms of game winner). After many selfplay iterations on those endgames, 
+it currently labels 97~98% of the games correct. It has made quite some progress, but still hasn't mastered
+life-and-death yet. More self-play to go.
+
+
+<p class="floatcleared"></p>
+
+</body>
+
+<script type="text/javascript">
+var elem = document.getElementById("game-seki");
+player = new WGo.BasicPlayer(elem, {
+    sgfFile: "sgf/endgame33-seki.sgf",
+    move: 52,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+var elem = document.getElementById("game-duration");
+player = new WGo.BasicPlayer(elem, {
+    sgfFile: "sgf/endgame33-duration.sgf",
+    move: 48,
+	layout: { // you can use static or dynamic layout
+        right: ['InfoBox', 'CommentBox'],
+        top: ['Control']
+    }
+});
+player.setCoordinates(true);
+
+function goto (move) { player.goTo(move); }
+// document.getElementById("move#91").onclick = function () { player.goTo(91); };
+</script>
+</html>
