@@ -5,5 +5,6 @@ My journey on AlphaGo experiments. First on 5x5 board:
 - [Dissecting "super-human performance" of AlphaGo](go5/super-human.md)
 - [Dispatch from the trenches: from 5x5 to 9x9](go5/go5-to-9.md)
 - [Training bot to play endgames](https://hyu2000.github.io/go5/endgame.html)
+- [Too many bots](go5/model-evaluate.md)
 
 More to come ...
