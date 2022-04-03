@@ -10,3 +10,5 @@ If 5x5 Go is a puzzle, 9x9 is more like the real deal. And you can finish a game
 - [Too many bots](go5/model-evaluate.md)
 
 More to come ...
+- [5x5 Go through the lens of KataGo](https://hyu2000.github.io/go5/kata-analysis-5x5.html)
+
