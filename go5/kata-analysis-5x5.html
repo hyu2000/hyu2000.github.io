@@ -47,7 +47,7 @@ two choices are essentially the same.
 
 <p>
 The worst ranking is for move #4, the "cut" move. It thinks B3/C4 is 1.5 points better. Let's take a closer
-look. Initially, it did look like white has found a better move than B2. And if black is not careful, the game can end in
+look. Initially, it did look like white has found a better move than D2. And if black is not careful, the game can end in
 a particularly interesting way. I got here by forcing KataGo to play B3 response, but set up the komi incorrectly.
 <input type="button" value="view" onclick="playerS.loadSgfFromFile('sgf/kata-on-go5/C2C3D3B3-komi5.5variation.sgf', 5);"/>
 
@@ -60,7 +60,7 @@ KataGo training, for example, considers this game void (a.k.a. <a href="https://
 When I ask KataGo to play the B3 response with the correct komi=0, the final score is just 1 point.
 <input type="button" value="view" onclick="playerS.loadSgfFromFile('sgf/kata-on-go5/C2C3D3B3.sgf', 5);"/>
 
-<p>Although this is less than the original score estimate at move #4, it is a better outcome for white. Therefore,
+<p>This is less than the original score estimate at move #4, albeit a better outcome for white. Therefore,
 it should indeed choose B3 over D2. What's going on? Is the optimal sequence not truly optimal?
 
 <p>
