@@ -1,7 +1,28 @@
-	   .floatright {
- 		  float: right;
-		  width: 300px;
-    	}
-		.floatcleared {
-		  clear: right;
-		}
+.floatright {
+  float: right;
+  width: 400px;
+}
+.floatcleared {
+  clear: right;
+}
+
+.fullboard {
+  width: 70%;
+  margin-left: 0;
+}
+
+.wgo-twocols .wgo-player-center {
+	width: 40%;  /* or 600px; */
+	/* border: 2px solid #ccc; */
+}
+.wgo-twocols .wgo-player-right {
+    width: 60%;
+}
+
+.wgo-player-right .wgo-commentbox, .wgo-player-left .wgo-commentbox {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	left: 10px;
+	top: 0px;
+}
