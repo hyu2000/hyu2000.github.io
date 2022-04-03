@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>training AZ bot to solve endgames</title>
+	<script type="text/javascript" src="wgo/wgo.js"></script>
+	<script type="text/javascript" src="wgo/kifu.js"></script>
+	<script type="text/javascript" src="wgo/sgfparser.js"></script>
+	<script type="text/javascript" src="wgo/player.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.component.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.infobox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.commentbox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.control.js"></script>
+	<script type="text/javascript" src="wgo/player.editable.js"></script>
+	<script type="text/javascript" src="wgo/scoremode.js"></script>
+	<script type="text/javascript" src="wgo/player.permalink.js"></script>
+	<link type="text/css" href="wgo/wgo.player.css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="mygo.css">
+</head>
+<body>
+<h2>Revisiting 5x5 through the lens of KataGo</h2>
+
+<p>
+Below we show the optimal game in 5x5 Go with C2 opening, analyzed by one of the super-human KataGo models.
+<input type="button" value="view" onclick="playerB.loadSgfFromFile('sgf/kata-on-go5/optimalC2.analysis-by-b20.v500.sgf', 4);"/>
+Chinese rule is used, komi=0. The comments section shows lots of useful information for potential moves: predicted win-rate, score
+	difference, number of visits, principle variation, etc. The actual move is marked with an asterisk.
+
+<p>
+Most of the time KataGo agrees with the optimal play. Sometimes it evaluates a move accurately, with just
+a single visit.
+
+<div id="game-full" class="fullboard wgo-twocols">
+</div>
+
+<p class="floatcleared"></p>
+
+
+<h2> Puzzle Time</h2>
+
+<div id="game-small" class="floatright"></div>
+
+<p>
+On the other hand, it did rank the best move second several times. Sometimes it's due to symmetry, where the
+two choices are essentially the same.
+
+<p>
+The worst ranking is for move #4, the "cut" move. It thinks B3/C4 is 1.5 points better. Let's take a closer
+look. Initially, it did look like white has found a better move than B2. And if black is not careful, the game can end in
+a particularly interesting way. I got here by forcing KataGo to play B3 response, but set up the komi incorrectly.
+<input type="button" value="view" onclick="playerS.loadSgfFromFile('sgf/kata-on-go5/C2C3D3B3-komi5.5variation.sgf', 5);"/>
+
+<p>
+This ending (double ko) is quite interesting. Result of the game varies depending on
+the ko rule used. While I think it is fair that each side be awarded one ko (a white win in this case),
+KataGo training, for example, considers this game void (a.k.a. <a href="https://senseis.xmp.net/?EternalLife">eternal life</a>).
+
+<p>
+When I ask KataGo to play the B3 response with the correct komi=0, the final score is just 1 point.
+<input type="button" value="view" onclick="playerS.loadSgfFromFile('sgf/kata-on-go5/C2C3D3B3.sgf', 5);"/>
+
+<p>Although this is less than the original score estimate at move #4, it is a better outcome for white. Therefore,
+it should indeed choose B3 over D2. What's going on? Is the optimal sequence not truly optimal?
+
+<p>
+After quite some head-scratching and poking around, I found that B3/C4 can lead to a 3-point win as well.
+So the good news is that there are multiple paths leading to 3-point win.
+I will leave the exact sequence of play as a take-home exercise :)
+<input type="button" value="view" onclick="playerS.loadSgfFromFile('sgf/kata-on-go5/C2C3D3B3.3pt-win.sgf', 5);"/>
+
+
+<p>
+Also, if you are not careful, even with the "cut" play (D2), black could end up winning by 1 point, short of
+the expected 3 points.
+<input type="button" value="view" onclick="playerS.loadSgfFromFile('sgf/kata-on-go5/C2C3D3D2.1pt-win.sgf', 4);"/>
+From the comments section above, we can see that for move #6, white thinks E2 is better than B2.
+
+<p>
+I think the underlying reason is that KataGo wasn't really trained on boards as small
+as 5x5. While it plays 5x5 quite well, the model is not as sharp as it could've been. More search is needed
+to compensate for that. The full analysis (with more searches) will be shown on the big board
+<input type="button" value="above" onclick="playerB.loadSgfFromFile('sgf/kata-on-go5/optimalC2.analysis-by-b20.v1000.sgf', 4);"/>.
+Now if we go to move #6, we see that B2 is the top choice and E2 has dropped way off.
+
+<p>
+On a side note, KataGo plays strongly in any situation, whereas the standard AZ maximizes win-rate only. The actual
+score is of no importance to AZ. In other words, we cannot expect well-trained AZ model to pursue the optimal
+path. It may pick <em>any</em> winning path.
+
+
+<h2>Have we finally solved 5x5?</h2>
+<p>
+While I was researching the puzzle mentioned above, I remembered that in my own 5x5 bot training, the C2-C3-D3-B3
+sequence did happen, see the 2nd and 3rd board <a href="https://hyu2000.github.io/go5/model-evolution.html">there</a>.
+The game shown there is on a different path, which is considered quite sub-optimal by KataGo models. Here is how
+KataGo would proceed.
+<input type="button" value="view" onclick="playerS.loadSgfFromFile('sgf/kata-on-go5/C2C3D3B3B2.v1000.sgf', 5);"/>
+It has again turned into a big fight and ends in a double-ko situation.
+
+<p>
+Are we set on all those C2 variations now? I'm confident, but I'd still take it with a grain of salt.
+If you look closely at the win-rate estimates / policy priors, there is still room for improvement.
+
+<p class="floatcleared"></p>
+
+</body>
+
+<script type="text/javascript">
+// better just one player while each link loads a different sgf.
+var $ = function(id) {
+	return document.getElementById(id);
+}
+
+var elem = document.getElementById("game-full");
+playerB = new WGo.BasicPlayer(elem, {
+    sgfFile: "sgf/kata-on-go5/optimalC2.analysis-by-b20.v500.sgf",
+    move: 4,
+	layout: {
+        right: ['CommentBox'], // 'InfoBox'
+        top: ['Control'],
+    },
+	enableWheel: false,
+    kifuLoaded: function(e) {
+    	playerB.focus();
+    },
+    update: function(e) {
+        // if(e.node.move) playerS.goTo(e.path.m);
+	}
+});
+playerB.setCoordinates(true);
+
+
+var elem = document.getElementById("game-small");
+playerS = new WGo.BasicPlayer(elem, {
+    sgfFile: "sgf/kata-on-go5/C2C3D3B3-komi5.5variation.sgf",
+    move: 4,
+	layout: {
+        // right: ['CommentBox'],
+        top: ['Control']
+    },
+    kifuLoaded: function(e) {
+    	playerS.focus();
+    },
+});
+playerS.setCoordinates(true);
+
+// document.getElementById("move#91").onclick = function () { player.goTo(91); };
+</script>
+</html>
