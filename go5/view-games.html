@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+	<title>WGo.js SGF viewer</title>
+	<script type="text/javascript" src="wgo/wgo.js"></script>
+	<script type="text/javascript" src="wgo/kifu.js"></script>
+	<script type="text/javascript" src="wgo/sgfparser.js"></script>
+	<script type="text/javascript" src="wgo/player.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.component.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.infobox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.commentbox.js"></script>
+	<script type="text/javascript" src="wgo/basicplayer.control.js"></script>
+	<script type="text/javascript" src="wgo/player.editable.js"></script>
+	<script type="text/javascript" src="wgo/scoremode.js"></script>
+	<script type="text/javascript" src="wgo/player.permalink.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<link type="text/css" href="wgo/wgo.player.css" rel="stylesheet" />
+    <link type="text/css" href="mygo.css" rel="stylesheet" />
+  </head>
+  <body>
+	<label id="filechosen"></label>
+
+	<select id="select-file">
+		<option value="sgf/9x9/katatrain.b60c320.analysis-b40.sgf">commented game 1</option>
+		<option value="sgf/9x9/katatrain.29724245.eternal life.sgf">eternal life</option>
+	</select>
+
+    <div id="board" class="wgo-twocols">
+      <!-- board will go here -->
+    </div>
+
+	<script>
+	// https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications
+
+	const label = document.getElementById('filechosen');
+	const chooser = document.getElementById('select-file');
+
+	// $('#select-file').append(new Option('endgame30', '9x9/endgame30_1_benson.labelled.600/sgf/full'));
+
+	var player = new WGo.BasicPlayer(document.getElementById("board"), {
+		// sgf: "(;SZ[9]PB[Black]PW[White]RE[B+R];B[cd];W[dd])",
+		sgfFile: "sgf/9x9/katatrain.b60c320.analysis-b40.sgf",
+		layout: {
+			right: ["CommentBox"],  //"InfoBox"],
+			top: ["Control"],
+		},
+    	move: 5,
+	});
+	player.setCoordinates(true);
+
+	function updatePlayer() {
+	  let file = chooser.value;
+	  console.log('File ', file);
+
+	  player.loadSgfFromFile(file, 5);
+	}
+	chooser.addEventListener('change', updatePlayer);
+
+	// below does not work due to js sandboxing: we can only load files in the resources
+	function updatePlayerTextBox() {
+		var txt = "";
+		var xmlhttp = new XMLHttpRequest ();
+		xmlhttp.onreadystatechange = function () {
+			if (xmlhttp.status == 200 && xmlhttp.readyState == 4) {
+				txt = xmlhttp.responseText;
+				player.loadSgf(txt);
+				player.goTo(5);
+			}
+		};
+		var dir = file_selector.value;
+		xmlhttp.open("GET", dir + '/' + tbox.value, true);
+		xmlhttp.send();
+	}
+
+	</script>
+  </body>
+</html>
