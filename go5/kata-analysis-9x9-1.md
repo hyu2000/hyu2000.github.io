@@ -30,7 +30,7 @@ White move #52 (H7) is also interesting. Otherwise, black might be able to buy m
 at tight fighting, so you have to take my analysis with a grain of salt.
 
 In the end black lost the battle. White took all. Bot knows this at move #55, as win rate dropped sharply and never recovered.
-When we examine the final board (#69), black is back by only one step in the capture race. Also, if black wins the race,
+When we examine the final board (#69), black is behind by only one step in the capture race. Also, if black wins the race,
 it wins by only 1 point. This brings us back to the motivation behind black move #49 (F9). F9 is purely for territory
 gain, which costed black the race in the end; but without which black will lose any ways.
 
