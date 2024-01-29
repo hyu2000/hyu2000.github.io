@@ -12,7 +12,7 @@ Can we train a bot that can solve puzzles? This turns out to be a great way in u
 how AZ training makes progress. 
 
 # insights from working on a simple puzzle
-Consider this simple puzzle https://online-go.com/puzzle/15438: black to kill. Even a beginner would
+Consider [this simple puzzle](https://online-go.com/puzzle/15438): black to kill. Even a beginner would
 know that H1 is the key, the only place where two eyes could be made. But to a randomly-initialised bot,
 the entire board is eligible; it hasn't learned how capture works either.
 
