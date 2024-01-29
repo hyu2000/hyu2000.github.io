@@ -15,3 +15,4 @@ More to come ...
 - [The Split-Brain problem, mini-max, and a conservative strategy out of self-play](go5/split-brain.md)
 - [AlphaGo lineage, Game theory, open-ended learning](go5/life-after-AlphaGo.md)
 - [Computation power, efficiency](go5/compute.md)
+- [Solving Go puzzles](go5/go-puzzle-solver.md)
