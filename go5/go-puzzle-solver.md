@@ -38,7 +38,7 @@ however slightly. After the next G1 move, it starts to believe it will win a lit
 to a player who has just discovered a new trick, and is gingerly experimenting with it more, with confidence
 growing if the results hold.
 
-# any hope of an definitive answer?
+# any hope of a definitive answer in Go?
 For more advanced puzzles, [example](https://online-go.com/puzzle/42943), I have seen the bot bumped into the 
 solution move (for the very first move), 
 after a while switching to another opening, and later switch back to the correct opening, not unlike a player
