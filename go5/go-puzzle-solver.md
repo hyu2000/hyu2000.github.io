@@ -1,11 +1,11 @@
-It was said that professional Go players spend most of their time solving puzzles, typically life and death
+It was said that professional Go players spend most of their days solving puzzles, typically life and death
 problems (LnD).
 AlphaZero never did any puzzles. Its learning is completely unscripted. Can it solve puzzles correctly?
 Can we speed up learning by adding puzzle solving to its curriculum?
 
 The answer to the first question is likely yes. Of course AZ knows nothing about what a puzzle is really
-about. We could fill up the rest of the board so that the outcome of a corner will decide winner of the
-entire board. A well-trained bot is able to solve all puzzles I have tried. But it is a tedious job to
+about. We need to fill up the rest of the board so that the outcome of the puzzle will determine the winner of the
+entire board. A well-trained AZ bot is able to solve all puzzles I have tried. But it is a tedious job to
 fill up a board properly, so I didn't test many.
 
 Can we train a bot that can solve puzzles? This turns out to be a great way in understanding 
@@ -38,7 +38,7 @@ however slightly. After the next G1 move, it starts to believe it will win a lit
 to a player who has just discovered a new trick, and is gingerly experimenting with it more, with confidence
 growing if the results hold.
 
-# any hope of definite answer?
+# any hope of an definitive answer?
 For more advanced puzzles, [example](https://online-go.com/puzzle/42943), I have seen the bot bumped into the 
 solution move (for the very first move), 
 after a while switching to another opening, and later switch back to the correct opening, not unlike a player
