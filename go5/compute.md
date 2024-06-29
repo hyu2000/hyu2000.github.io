@@ -1,7 +1,6 @@
 One of the main challenges in AZ experiments is computing power. When reading the first AlphaGo
 paper, I'm aware of the thousands of machines they deployed for self-play. But for 9x9 board, the complexity
-should be a lot lower. As a matter of fact, the SAI paper said 9x9 reduces the amount of computation by a magnitude
-of 9: games are shorter (roughly 9x9 rather than 19x19); input feature maps (to DNN) smaller; branching factor
+should be a lot lower. As a matter of fact, the SAI paper said 9x9 reduces the amount of computation by 9 orders of magnitude: games are shorter (roughly 9x9 rather than 19x19); input feature maps (to DNN) smaller; branching factor
 in the search tree smaller. All in all, I figured that I can probably get away with a shoe-string compute
 budget: my M1 macbook pro, which has just come out, with a relatively decent GPU. In the worst case, I will let 
 it run for a couple weeks, or a month. After all, I have only a modest goal and there are no deadlines to hit.
