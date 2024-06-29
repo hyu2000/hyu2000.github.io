@@ -23,7 +23,7 @@ expensive NN evaluations across multiple workers in Python, given that I'm using
 the cache has to work across process boundary. Multi-threading would be much more preferable. Alas, I am using
 Python.
 
-With parallel workers, I can run 2000~3000 self-play games on my laptop in 5~6 hours. It is painfully slow, and the 
+With parallel workers, I can run 2000\~3000 self-play games on my laptop in 5\~6 hours. It is painfully slow, and the 
 occasional hang is a nuisance (deep inside some Tensorflow ops which I never figured out). 
 But I was able to see progress in game quality, after several iterations.
 
