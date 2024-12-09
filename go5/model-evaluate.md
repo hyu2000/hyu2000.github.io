@@ -30,5 +30,5 @@ Suppose we know their Elo rankings now. We should probably go with the stronger 
 is the right choice. Even with the same model, we can change
 the amount of searches and get a different move. The key here, I think, is to adopt a *probabilistic*
 way of thinking. This is the paradox of board games. They are clearly deterministic with perfect information.
-We know there is a minimax solution. But we don't know it. Out of the shear search space rises uncertainty.
+We know there is a minimax solution. But we don't know it. Out of the sheer size of the search space arises uncertainty.
 60% chance of winning. Deal with it.
