@@ -16,3 +16,4 @@ More to come ...
 - [AlphaGo lineage, Game theory, open-ended learning](go5/life-after-AlphaGo.md)
 - [Computation power, efficiency](go5/compute.md)
 - [Solving Go puzzles](go5/go-puzzle-solver.md)
+- [Selfplay Evolution](go5/selfplay5-evolution.md)
