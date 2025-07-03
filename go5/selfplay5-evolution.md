@@ -1,12 +1,16 @@
 # dynamics of selfplay evolution
 As mentioned [before](https://hyu2000.github.io/go5/5x5-complexity.html), the C2 opening of 5x5 Go is a great case-study for the AlphaZero algorithm: 
-complex enough (>4 billion states), yet much lighter on computation resources.
+complex enough (>4 billion states), yet much lighter on compute.
 
-It's interesting to examine how the model evolves over time. This is another advantage of 5x5 Go: we can try to
-assess the games ourselves. Mainline gives us a conveniently simple view: what the model thinks of the best game
-it can possibly play. It is very one-dimensional, but selfplay games are all centered around the mainlines.
+It's interesting to examine how the model evolves over time. Mainline gives us a conveniently simple view: what the 
+model thinks of the best game it can possibly play. It is very one-dimensional, but selfplay games all center around 
+the mainline. (This is another advantage of 5x5 Go: we can try to assess the games ourselves.)
 
-Example (mp8.try5 run):
+In the beginning, the games are pretty random. For the C2 opening, the first concept it grasps is that C3 is pretty 
+important, leads us to the C2 C3 opening. Then it would try various moves, focuses on C2 C3 D3. For the first 4 moves,
+the two main branches are C2 C3 D3 D2 and C2 C3 D3 B3. Various patterns would emerge, shift, and maybe resurface later.
+
+Below is a frequent pattern (mp8.try5 run):
 - one of the earlier openings where black wins the C2 opening is the "cut" pattern:
 C2 C3 D3 D2 D1 D4 E2 B3 E4 C4 [main_model17-75130708168.sgf](https://hyu2000.github.io/go5/view-games.html)
 It happens to be an optimal C2 opening. 
@@ -42,13 +46,16 @@ Many times it leads to big fight / seki / ko in the end. I have yet to understan
 I noticed before that 5x5 Go can be very tricky, but these games (found in selfplay) took it to another level.
 
 [weird-bwin-as-white-ran-out-of-moves.rp2.sgf](https://hyu2000.github.io/go5/view-games.html)
-To any Go player, the result of this game is a complete surprise. Black wins the game despite the fact that white is
-unconditionally alive, and black has only 1 eye! The rule I used is Chinese area scoring, basic Ko, komi 0.5.
-White lost due to ko (the exact Ko rule does not matter). In a bigger board, typically it can play a nuisance move 
-somewhere, then be able to take back the ko and kill off black. But here it's stuck: there is no place to
-put down another stone. And black knew exactly how to take advantage of it by proactively passing.
-  While one might brush this aside as rare events, I would rather change the game rule to end a game on 3 passes 
-instead of 2.
+To any Go player, the result of this game is a complete surprise. Black wins the game despite the fact that it has 
+only one eye, but white has two (unconditionally alive). The rule I used is Chinese area scoring, basic Ko, komi 0.5.
+White lost in part due to Ko (the exact Ko rule does not matter). Were it a bigger 
+board, it can play a nuisance move 
+somewhere, then capture back the Ko and kill off black. But here it's stuck: there is no place to
+put down another stone. And black knew exactly how to take advantage of the opportunity by proactively passing.
+  
+While one might brush this aside as a rarity, I would rather change the game rule to end a game on 3 passes 
+instead of 2. In a way, this is the familiar reward hacking of RL: it would exploit a loophole if one can be found.
+As we push training to the limit, we will see more such "weird" games.
 
 [debate.adv-weakness-move39.sgf](https://hyu2000.github.io/go5/view-games.html)
 Black has killed all white at move 29. But now it's in an unchartered waters. White is rewarded by its perseverance
