@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who Wrote It?</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f6f3; --surface: #fcfcfb; --border: #e3e1db;
+  --text: #0b0b0b; --text-2: #52514e; --muted: #85837d;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --gray: #b9b7b0;
+  --grid: #ebe9e4; --good: #008300; --bad: #c4312f; --code-bg: #f0efec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121211; --surface: #1a1a19; --border: #33332f;
+    --text: #ffffff; --text-2: #c3c2b7; --muted: #8c8b83;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --gray: #5b5a55;
+    --grid: #2a2a27; --good: #3fae3f; --bad: #e66767; --code-bg: #23231f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121211; --surface: #1a1a19; --border: #33332f;
+  --text: #ffffff; --text-2: #c3c2b7; --muted: #8c8b83;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --gray: #5b5a55;
+  --grid: #2a2a27; --good: #3fae3f; --bad: #e66767; --code-bg: #23231f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif; }
+main { max-width: 860px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+h2 { font-size: 1.35rem; margin: 56px 0 8px; letter-spacing: -0.005em; }
+h3 { font-size: 1.05rem; margin: 28px 0 6px; }
+p, li { color: var(--text); }
+.lede { color: var(--text-2); font-size: 1.1rem; margin: 0 0 28px; }
+.sub { color: var(--text-2); font-size: .92rem; }
+code, .mono { font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 18px 0; }
+.tldr li { margin: 6px 0; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 18px 0; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.stat .v { font-size: 1.8rem; font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat .l { color: var(--text-2); font-size: .88rem; margin-top: 4px; }
+.fig-title { font-weight: 600; margin: 0 0 2px; }
+.fig-sub { color: var(--text-2); font-size: .9rem; margin: 0 0 12px; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .85rem; color: var(--text-2); margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.tip { position: fixed; pointer-events: none; z-index: 10; background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12); opacity: 0; transition: opacity .08s; max-width: 300px; }
+.tip b { font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { color: var(--text-2); font-weight: 600; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tablewrap { overflow-x: auto; }
+.hl { font-weight: 600; }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .8rem; font-weight: 600; border: 1px solid; }
+.pill.ok { color: var(--good); border-color: var(--good); }
+.pill.no { color: var(--bad); border-color: var(--bad); }
+.pill.mid { color: var(--text-2); border-color: var(--gray); }
+.verdict td:first-child { white-space: nowrap; }
+.callout { border-left: 3px solid var(--s1); padding: 4px 0 4px 14px; margin: 16px 0; color: var(--text-2); }
+.diagram text { font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: var(--text); }
+.diagram .small { font-size: 11.5px; fill: var(--text-2); }
+.diagram .box { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
+.diagram .boxA { fill: var(--surface); stroke: var(--s1); stroke-width: 1.5; }
+.diagram .boxB { fill: var(--surface); stroke: var(--s2); stroke-width: 1.5; }
+.diagram .arrA { stroke: var(--s1); stroke-width: 2; fill: none; }
+.diagram .arrB { stroke: var(--s2); stroke-width: 2; fill: none; }
+.diagram .jar { fill: var(--code-bg); stroke: var(--border); }
+footer { margin-top: 60px; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+<h1>Who wrote it? Agent identity in the DSEWiki logs</h1>
+<p class="lede">In mid-2026, hundreds of AI agents from an OpenAI evaluation wrote to DSEWiki, a public German wiki. Two datasets record what they did:
+the <b>revision history</b> published by the researchers who reconstructed the incident (the "export", where each edit has an author field called <code>label</code>),
+and the wiki operator's <b>raw access log</b> (one line per HTTP request, with a <code>NAME</code> field).
+Both author fields come from the same place, a display name. This report shows that the display name records <em>which agent most recently set a name through the proxy that delivered the edit</em>.
+Sometimes that's the author; often it isn't. It then shows when the name can be trusted, and how to recover authorship when it can't.</p>
+
+<div class="card tldr">
+<b>Short version</b>
+<ul>
+<li><b>No accounts.</b> On this wiki a display name is just a browser cookie. Reading needs no name; saving effectively requires one.</li>
+<li><b>Shared proxies.</b> The agents' code sent its requests through a shared pool of outbound proxy machines. Each proxy kept its own cookies, like a browser profile, and attached them to every request it forwarded. A request lands on a random proxy, except that code which reuses its connection stays on one proxy for a few seconds.</li>
+<li><b>So the name is a hint, not an identity.</b> If the name was set within 10 seconds before a save, it matches the author's own signature __SINCE_FRESH__ of the time. If it had been sitting on a proxy for more than 6 hours, only __SINCE_STALE__. Across all saves, the name is right roughly __WEIGHTED__ of the time.</li>
+<li><b>A recipe that does better.</b> Trust a signature in the text first, then a name set within 10 seconds before the save (__SINCE_FRESH__ right, but only about 1 in 5 saves qualify). For the rest, compare the shape of each agent's save URL: same name and same URL shape means the same author 95% of the time.</li>
+<li><b>A second, read-only channel.</b> OpenAI's ChatGPT-User fetcher (IP block 23.98.142.176/28) started reading the wiki on 24 May, the same day the agents arrived. Every write came through the agents' own code.</li>
+</ul>
+</div>
+
+<div class="card">
+<b>Terms used in this report</b>
+<table style="margin-top:8px">
+<tr><td class="hl">Agent / episode</td><td>One run of an AI agent in its own sandboxed environment. <em>The Mechanics of a Swarm</em> (Lütje, 2026; linked in section 4) estimates about 900 of them.</td></tr>
+<tr><td class="hl">Export, <code>label</code></td><td>The published revision history; <code>label</code> is the display name stored with each revision.</td></tr>
+<tr><td class="hl">Log, <code>NAME</code></td><td>The wiki's raw request log; <code>NAME</code> is the display name the wiki recorded for that request.</td></tr>
+<tr><td class="hl">Proxy (worker)</td><td>One machine in the shared outbound pool the agents' requests went through.</td></tr>
+<tr><td class="hl">Cookie jar</td><td>The cookies one proxy holds. One proxy = one jar. The jar's name cookie is what the wiki records.</td></tr>
+<tr><td class="hl">Cache-buster</td><td>A throwaway URL parameter such as <code>x=1781644008.46</code> that makes each URL unique. Each agent's code formats it its own way, so a distinct format is a rough ID for a piece of code.</td></tr>
+<tr><td class="hl">Save-code fingerprint</td><td>The shape of an agent's save URL: hostname, parameter order and cache-buster format.</td></tr>
+<tr><td class="hl">Signature</td><td>The sign-off agents wrote at the end of their posts, e.g. <code>-- AgentAug11Live</code>.</td></tr>
+<tr><td class="hl">Code route / ChatGPT-User route</td><td>The two ways requests reached the wiki: the agents' own code (Microsoft Azure IP addresses, through the proxy pool), and OpenAI's ChatGPT-User fetcher (section 8).</td></tr>
+</table>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="v">__NREQ__</div><div class="l">requests parsed (May + June logs)</div></div>
+  <div class="stat"><div class="v">__EXPLICIT__</div><div class="l">of saves name their author inside the request</div></div>
+  <div class="stat"><div class="v">__WEIGHTED__</div><div class="l">estimated share of saves whose name is the author</div></div>
+  <div class="stat"><div class="v">17</div><div class="l">different names on the requests of one script</div></div>
+</div>
+
+<h2>1. How names work on DSEWiki</h2>
+<p>DSEWiki runs ProWiki, an old Perl wiki engine. It has <b>no accounts and no login</b>. A display name is a cookie, and there are two ways to get one:</p>
+<ul>
+<li><b>Save preferences:</b> <code>wiki.cgi?action=form_editprefs&amp;p_username=SomeName&amp;…</code>. The wiki replies with a cookie holding the name. I call this a <em>name-setting request</em>.</li>
+<li><b>Put it in the save itself:</b> add <code>&amp;username=SomeName</code> to the page-save URL.</li>
+</ul>
+<p>After that, every request that arrives with the cookie can be recorded under that name. The wiki's own welcome text asks visitors to set their name under "Einstellungen" (Preferences) before editing.</p>
+
+<h3>Reading needs no name; saving effectively requires one</h3>
+<p>Of __NSAVES__ save requests in the logs, only <b>__UNNAMED__ carry no name, and none of them produced a revision</b>.
+For comparison, named saves produced an archived revision __NAMED_ARCH__ of the time. Many save attempts in this incident left no revision (retries, duplicate submissions, rejected saves); the log doesn't say which. Even so, if unnamed saves succeeded at the same rate, getting 0 out of __UNNAMED__ by chance would be very unlikely.
+The log doesn't record the wiki's responses, so this is strong circumstantial evidence, not proof.</p>
+
+<h3>What agents typically did</h3>
+<p>From the agents' very first minutes on 24 May the pattern was <em>set name → open edit form → save</em>, within 1–2 seconds:</p>
+<div class="card mono" style="overflow-x:auto;white-space:pre">05:57:55  TesterHack       form_editprefs  TestFederalLinks
+05:57:59  TesterHack       edit            TestFederalLinks
+06:02:18  FederalUserTest  form_editprefs  FederalDataReferenceXYZ
+06:02:18  FederalUserTest  edit            FederalDataReferenceXYZ
+06:02:19  FederalUserTest  form_edit       FederalDataReferenceXYZ   ← first archived edit</div>
+<p>Later, most agents set a name once or occasionally rather than before every save: there are __PREFS_PER_SAVE__ name-setting requests per page save, and only __EXPLICIT__ of saves carry <code>username=</code>.
+For each of the __NFLEETSAVES__ saves from the agents' own code, here is how long before the save its name had last been set (by anyone):</p>
+<div class="card">
+<p class="fig-title">How long before each save its name had been set</p>
+<p class="fig-sub">Only about 1 in 5 saves (__FRESH_ALL__) follow a name set within the last 10 seconds. Most rely on a name set minutes to hours earlier, and section 5 shows that's where mislabels come from.</p>
+<div class="chart" id="behaveChart"></div>
+</div>
+
+<h2>2. How the agents' requests reached the wiki</h2>
+<p>The picture below is the model that is consistent with every test in this report. Sections 3 and 4 give the evidence.</p>
+
+<div class="card">
+<p class="fig-title">The working model</p>
+<p class="fig-sub">Blue: the code route, the agents' own code, which carried all writes and passes through the shared proxies. Orange: the read-only ChatGPT-User fetcher.</p>
+<div class="chart diagram">
+<svg viewBox="0 0 820 340" role="img" aria-label="Diagram: agent code sends requests through a shared proxy pool with cookie jars, or through the ChatGPT-User fetcher, to DSEWiki">
+  <defs>
+    <marker id="ha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--s1)"/></marker>
+    <marker id="hb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--s2)"/></marker>
+  </defs>
+  <text x="20" y="22" font-weight="600">~900 agent episodes</text>
+  <g>
+    <rect class="box" x="20" y="36" width="170" height="44" rx="8"/><text x="32" y="56">Agent A</text><text class="small" x="32" y="71">python, real clock</text>
+    <rect class="box" x="20" y="92" width="170" height="44" rx="8"/><text x="32" y="112">Agent B</text><text class="small" x="32" y="127">never sets a name</text>
+    <rect class="box" x="20" y="148" width="170" height="44" rx="8"/><text x="32" y="168">Agent C …</text><text class="small" x="32" y="183">sets name "C" once</text>
+    <rect class="box" x="20" y="250" width="170" height="44" rx="8"/><text x="32" y="270">Agent's fetch tool</text><text class="small" x="32" y="285">"open this URL"</text>
+  </g>
+  <rect class="boxA" x="280" y="30" width="250" height="180" rx="10"/>
+  <text x="296" y="52" font-weight="600">Shared outbound proxy pool</text>
+  <text class="small" x="296" y="68">≥ ~900 proxies · new IP almost every request</text>
+  <g>
+    <rect class="jar" x="296" y="82" width="106" height="34" rx="6"/><text class="small" x="306" y="103">jar: "C"</text>
+    <rect class="jar" x="410" y="82" width="106" height="34" rx="6"/><text class="small" x="420" y="103">jar: "Research…"</text>
+    <rect class="jar" x="296" y="124" width="106" height="34" rx="6"/><text class="small" x="306" y="145">jar: "Grocery…"</text>
+    <rect class="jar" x="410" y="124" width="106" height="34" rx="6"/><text class="small" x="420" y="145">jar: "Maids…"</text>
+    <text class="small" x="296" y="184">each request → a random proxy,</text>
+    <text class="small" x="296" y="199">unless the connection is reused (seconds)</text>
+  </g>
+  <rect class="boxB" x="280" y="240" width="250" height="64" rx="10"/>
+  <text x="296" y="264" font-weight="600">ChatGPT-User fetcher</text>
+  <text class="small" x="296" y="282">23.98.142.176/28 · no cookies · reads only</text>
+  <rect class="box" x="620" y="110" width="180" height="110" rx="10"/>
+  <text x="636" y="136" font-weight="600">DSEWiki</text>
+  <text class="small" x="636" y="156">records IP + NAME from</text>
+  <text class="small" x="636" y="172">the cookie that arrived</text>
+  <text class="small" x="636" y="196">→ NAME = last name set</text>
+  <text class="small" x="636" y="211">through that proxy</text>
+  <path class="arrA" d="M190,58 C235,58 240,90 280,95" marker-end="url(#ha)"/>
+  <path class="arrA" d="M190,114 C235,114 240,130 280,135" marker-end="url(#ha)"/>
+  <path class="arrA" d="M190,170 C235,170 240,160 280,160" marker-end="url(#ha)"/>
+  <path class="arrB" d="M190,272 L280,272" marker-end="url(#hb)"/>
+  <path class="arrA" d="M530,125 C575,125 580,150 620,152" marker-end="url(#ha)"/>
+  <path class="arrB" d="M530,272 C585,272 585,205 620,200" marker-end="url(#hb)"/>
+</svg>
+</div>
+</div>
+<p>Agent B in the picture never sets a name, yet its saves still go through, because whichever proxy it lands on already holds somebody's name.</p>
+
+<h2>3. Evidence: one script, seventeen names</h2>
+<p>Many agents added a cache-buster to their URLs. The values are <b>real Unix timestamps</b>, in formats like <code>x=1781644008.46</code> (Python's <code>time.time()</code>) or <code>x=1781644008464499339</code> (<code>time.time_ns()</code>), typically 1 second before the request reached the wiki.
+So the agents were running code with a real clock, not typing URLs by hand.</p>
+<p>Some agents' code also appended a <b>loop counter</b> to the timestamp. Here are the first and last requests of one such loop on 16 June, 19:12 UTC:</p>
+<div class="card mono" style="overflow-x:auto;white-space:nowrap">wiki.cgi?action=browse&amp;id=DataUSAStateSequenceCollab2027&amp;<b>revision=1.1</b>&amp;x=1781637130.0120592<b>-1</b><br>
+… 52 more …<br>
+wiki.cgi?action=browse&amp;id=DataUSAStateSequenceCollab2027&amp;<b>revision=1.54</b>&amp;x=1781637139.3448014<b>-54</b></div>
+<p>The script was walking through the page's history (versions 1 to 54), roughly <code>for n in range(1, 55): get(f"...revision=1.{n}&amp;x={time.time()}-{n}")</code>.
+The cache-buster format alone doesn't show this, because other agents used the same format. What makes these 54 requests one loop is how they fit together:</p>
+<ul>
+<li><b>One unbroken sequence.</b> The counters run 1 to 54 with no gaps or repeats, all on one page.</li>
+<li><b>Timestamps follow the counter.</b> The embedded timestamps rise strictly with the counter, across 9.3 seconds.</li>
+<li><b>The counter matches the content.</b> Every request's counter equals the revision it asks for.</li>
+<li><b>Nobody else did this.</b> No other requests in that window walk this page's history.</li>
+</ul>
+<div class="card">
+<p class="fig-title">Display name on each request from a single loop over page history</p>
+<p class="fig-sub">Each dot is one request (one history version), in counter order. 19 of the 54 requests recorded a name, and they show 17 different names. Hover for details.</p>
+<div class="chart" id="loopChart"></div>
+<div class="legend"><span><i style="background:var(--s1)"></i>name recorded</span><span><i style="background:var(--gray)"></i>not recorded (see below)</span></div>
+</div>
+<p>A loop of code can't have 17 identities, so the name must come from somewhere <em>between</em> the code and the wiki.
+It isn't the IP address either: the 54 requests came from 54 different IPs, and more generally, two page views from the same IP within 2 seconds share a name under 2% of the time.</p>
+<p>The script fired its first 8 requests in parallel (their timestamps are within 12 ms of each other, and they arrived out of order), then continued at about 6 per second.
+The names change even within a single second: counters 9, 10 and 11 arrived in the same second under three different names. Every one of the 54 went out from a different IP, so this script never reused a connection, and each request was free to land on a different proxy.</p>
+
+<h3>Why are most dots grey?</h3>
+<p>The wiki records the name on some request types and not others, even when the cookie is there. Scripted bulk reads like the loop above (at least 10 same-format requests to one page within 20 seconds) land on random proxies, so they all sample the same mix of jars:</p>
+<div class="card">
+<p class="fig-title">Share of scripted bulk requests that record a name, by request type</p>
+<p class="fig-sub">Old versions fetched with <code>action=archive</code> always record a name. The same content fetched with <code>action=browse</code> records one only about half the time.</p>
+<div class="chart" id="nameChart"></div>
+</div>
+<p>So practically every proxy's jar held a name, and a grey dot means "not recorded", not "no cookie". What decides it is unclear; server processing time is identical for recorded and unrecorded requests, so it isn't a cached copy being served. Edit forms, saves and archive reads are effectively 100% recorded, and that's all the authorship analysis relies on.</p>
+
+<h2>4. Evidence: what the cookie jars look like</h2>
+<h3>Names appear only when someone sets them…</h3>
+<p>Of __NNAMES__ distinct names, __BORN__ first appear on the very request that set them. Almost all the rest were set in the same second or shortly before, by a request recorded slightly out of order or under another name; only <b>__NOPRIOR__ names</b> appear with no earlier name-setting request.
+They are also stored separately for <code>wikiservice.at</code> and <code>www.wikiservice.at</code>, the way browser cookies are scoped to a hostname.</p>
+
+<h3>…then the jar lends them to everyone, sometimes for weeks</h3>
+<p>The name <code>ResearchHelper</code> was set on 24 May. On 18 June it was still being stamped on requests with <b>86 different cache-buster formats</b>, so 86 different pieces of code, all on coordination pages created weeks later:</p>
+<div class="card">
+<p class="fig-title">Requests carrying the name "ResearchHelper", per day</p>
+<p class="fig-sub">Bar height: requests. Number above the big days: how many different cache-buster formats (≈ different pieces of code) carried the name. Hover any bar for its count.</p>
+<div class="chart" id="rhChart"></div>
+</div>
+<p>Counting names "in use" at the same moment gives a floor on the number of jars: about <b>900+ at peak</b> (17 June). That's similar to the ~900 episodes estimated in <a href="https://arxiv.org/abs/2609.12748">The Mechanics of a Swarm</a> (Lütje, 2026). One proxy per agent sandbox, with requests landing on <em>other</em> agents' proxies, is a plausible implementation, but I can't confirm it from this data.</p>
+
+<h3>…but routing is sticky for a few seconds</h3>
+<p>Agents typically load a page's edit form, then save a few seconds later. Do these two requests carry the same name?
+To be sure both requests came from the same agent, I only use quiet pages, where nobody else opened that page's edit form in the 2 minutes before the save.</p>
+<div class="card">
+<p class="fig-title">Share of edit-form → save pairs showing the same name, by time gap</p>
+<p class="fig-sub">Quiet pages only. Dashed line (__BG__): how often two <em>unrelated</em> agents' requests share a name.</p>
+<div class="chart" id="stickyChart"></div>
+</div>
+<p>Within 10 seconds the pair almost always goes through the same proxy. After that it drops sharply and levels off around 30%, still five times the background. A likely reason: many agents set their name several times (AgentAug11Live, one of the three authors in the first example of section 6, set its name five times in two hours), planting it in several jars, so a later request has a better-than-random chance of landing on one of them. This fits <b>connection reuse</b>: code that keeps a connection open (e.g. a <code>requests.Session</code>) stays on one proxy, and every new connection goes to a random one.</p>
+
+<h2>5. What a recorded name actually tells you</h2>
+<p>So, as the diagram in section 2 says, the recorded name is the last name anyone set through the proxy that carried the request.
+When an agent sets its name and saves within about 10 seconds, the stickiness window above, the save usually goes through that same proxy, and the name is the author's own.
+When the save comes later, it lands on a random proxy carrying someone else's name. The data shows this cleanly:</p>
+<div class="card">
+<p class="fig-title">Label matches the author's signature, by age of the name at save time</p>
+<p class="fig-sub">Signed edits only (section 6 explains signatures). A fresh name is reliable; a long-lived name in a shared jar mostly isn't.</p>
+<div class="chart" id="sinceChart"></div>
+</div>
+<p>Signed edits lean toward the reliable case: half of them follow a name set within 10 seconds, against about 1 in 5 of all saves (section 1). Weighting the accuracies above by how all saves actually behaved, the recorded name is the author for roughly <b>__WEIGHTED__</b> of saves.</p>
+
+<h2>6. What this does to the export's author labels</h2>
+<p>I compared each revision's <code>label</code> with the signature the agent wrote at the end of its own text, for the __NSIGNED__ revisions whose added text carries exactly one such signature.</p>
+<div class="callout"><b>What I use as ground truth.</b> From here on, the signature counts as the true author. It's a proxy, not proof, but a good one.
+It's the agent's own declaration and never passes through the proxies. It agrees with an independent cue: pairs of signed edits (≤ 3 h apart) with the same signature share a save-code fingerprint __SIG_SAME__ of the time, against __SIG_DIFF__ for different signatures.
+It's also rarely copied: only 3.2% of signed lines had appeared earlier in the wiki.
+Agents switching signatures would make labels look worse than they are; several agents sharing one signature would make them look better. So read these percentages as estimates, give or take a few points.
+The mechanism itself (sections 1–4) doesn't depend on signatures at all.</div>
+
+<div class="stats">
+  <div class="stat"><div class="v">__LABEQSIG__</div><div class="l">of signed edits: label = signature</div></div>
+  <div class="stat"><div class="v">__MULTILAB__</div><div class="l">of authors (≥3 signed edits) spread over &gt;1 label</div></div>
+  <div class="stat"><div class="v">__MULTISIG__</div><div class="l">of labels (≥3 signed edits) containing &gt;1 author</div></div>
+</div>
+
+<h3>Example: one name, three authors</h3>
+<p>The name <code>GroceryAgentAug03X</code> was set at 19:38:44 by the agent that signs as GroceryAgentAug03X. Its own save followed one second later, through the same proxy.
+Over the next 2 hours, 94 requests carried the name, from 93 IPs and 20 different cache-buster formats. Two of them were saves by other agents. <b>All three saves were made with different save code</b>:</p>
+<div class="tablewrap card" id="grocTable"></div>
+
+<h3>Example: one author, eleven names</h3>
+<p><code>OpenAIJanSixWatcher</code> <b>never set a display name</b>. Every save it made took whatever name was in the jar it hit.
+The six saves between 21:18:02 and 21:18:47 are a single retry loop, and each retry landed on a different proxy. All of its saves use the same save code, <b>code-C</b>, the same code behind the third save in the table above:</p>
+<div class="tablewrap card" id="janTable"></div>
+<p>This generalises. Agents that never set a name average __NOSET_LPR__ labels per signed edit, a fresh label almost every time. Agents that did set one stay under a single label __SET_SINGLE__ of the time.</p>
+
+<h2>7. Recovering authorship</h2>
+<p>An LLM agent usually writes its save function once and reuses it, so the save-code fingerprint is very stable within one agent.
+On its own it isn't distinctive, because many agents write near-identical code: two edits sharing a fingerprint have the same author only __FP_ALONE__ of the time.
+The name and the fingerprint fail in different ways, so together they cover each other:</p>
+<div class="card">
+<p class="fig-title">How often two signed edits (≤3 h apart) share an author</p>
+<p class="fig-sub">Grouped by whether they share the recorded name and/or the save-code fingerprint. Ground truth: the text signature.</p>
+<div class="chart" id="cueChart"></div>
+</div>
+<div class="callout"><b>Recipe, strongest evidence first.</b>
+<ol style="margin:6px 0 0 0;padding-left:20px">
+<li>A text signature, or a <code>username=</code> inside the save request: use it.</li>
+<li>A name set ≤ 10 s before the save: use it. It is right __SINCE_FRESH__ of the time. It applies to __RECIPE_COV__ of signed edits, but only about __FRESH_ALL__ of all saves.</li>
+<li>Otherwise the bare name is right only __RECIPE_REST__ of the time. Split it by save-code fingerprint: edits sharing both name and code are the same author 95% of the time. "Same name, different code" marks a borrowed name; only about 1 in 4 such pairs share an author. Name each group by any signature inside it; if none, by a name set within 10 s before one of its saves.</li>
+<li>A name older than 6 hours with nothing else to go on: treat the author as unknown.</li>
+</ol></div>
+<p>Step 3 groups edits by author rather than naming the author. Other clues that reflect the agent's own choices help name the group: the edit <code>summary</code> (e.g. the <code>Jan06 …</code> family above), loop counters, and other unique cache-buster tokens.</p>
+
+<h2>8. A second channel: OpenAI's own fetcher</h2>
+<p>Requests from the block <code>23.98.142.176/28</code>, listed in OpenAI's published <a href="https://openai.com/chatgpt-user.json">ChatGPT-User</a> IP ranges, are spread perfectly evenly across its 16 addresses (~28,000 each over the two months).
+They never carry a name or a cache-buster, and they mostly fetch bare links like <code>wiki.cgi?PageName=</code>. That trailing <code>=</code> appears when a tool re-encodes a URL.
+This traffic was close to zero before 24 May, jumped on the day the agents appeared, and 82% of it targets agent-touched pages. It made <b>zero</b> saves: all __SAVES__ saves from Azure came through the agents' own code, and the remaining saves came from other, non-OpenAI networks.</p>
+<div class="card">
+<p class="fig-title">Requests per day, by route</p>
+<p class="fig-sub">Two panels, each on its own scale; note the totals. Both routes start on 24 May. The code route drops to near zero on 22 June, about 09:30 UTC.</p>
+<div class="chart" id="routeChart"></div>
+</div>
+<p>The remaining __OTHER_REQ__ requests in the logs come from elsewhere: mostly search-engine crawlers, other bots and human visitors. They aren't analysed here.</p>
+
+<h2>9. Alternatives ruled out</h2>
+<ul>
+<li><b>"The recorded name is the agent"</b>: one script shows 17 names (section 3); one agent appears under 11 names (section 6).</li>
+<li><b>"The recorded name is unrelated to the agent"</b>: a name set within 10 s before a save is right __SINCE_FRESH__ of the time (section 5).</li>
+<li><b>"The name is tied to the IP address, or stored on the wiki's server"</b>: a new IP on almost every request (section 3); names appear only when set and are scoped per hostname, like cookies (section 4).</li>
+<li><b>"Agents shared a cookie file on a shared machine"</b>: one script sees three names within the same second, which would need several file writes per second (section 3).</li>
+</ul>
+
+<h2>10. Caveats and open questions</h2>
+<ul>
+<li>"Saving requires a name" is inferred from logged requests (__UNNAMED__ unnamed saves, none archived). The log doesn't contain the wiki's responses.</li>
+<li>Why plain page views record the name only about half the time is unknown. It doesn't affect saves, edit forms or archive reads.</li>
+<li>"Name set ≤ 10 s before" means <em>someone</em> set that name; usually, but not provably, the author.</li>
+<li>Accuracy figures are measured on signed edits, mostly coordination posts. The weighted __WEIGHTED__ assumes unsigned edits behave like signed ones with the same name age.</li>
+<li>The ChatGPT-User list I used was published in October 2026. That the block belonged to the same service in June is an assumption.</li>
+<li>"≥ ~900 jars" is a lower bound from overlapping name lifetimes. The pool's actual layout can't be identified from the wiki side.</li>
+<li>Network-provider classification uses well-known IP prefixes, offline. It's approximate for small blocks.</li>
+</ul>
+
+<footer>Generated from raw/log_2605.txt, raw/log_2606.txt and raw/full-wiki-logs. Code: analysis/*.py. Data: data/report_data.json.</footer>
+</main>
+<div class="tip" id="tip"></div>
+
+<script>
+const D = __DATA__;
+const NS = "http://www.w3.org/2000/svg";
+const tip = document.getElementById("tip");
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function showTip(evt, html) { tip.innerHTML = html; tip.style.opacity = 1;
+  const x = Math.min(evt.clientX + 14, window.innerWidth - tip.offsetWidth - 8); tip.style.left = x + "px"; tip.style.top = (evt.clientY + 14) + "px"; }
+function hideTip() { tip.style.opacity = 0; }
+function esc(s) { return String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+const pct = v => Math.round(v * 100) + "%";
+const fmt = n => n.toLocaleString("en-US");
+
+/* ---- loop chart ---- */
+(function () {
+  const L = D.loop, names = [];
+  L.forEach(r => { const k = r.name || "(none)"; if (k !== "(none)" && !names.includes(k)) names.push(k); });
+  names.push("(none)");
+  const W = 820, rowH = 17, top = 8, left = 210, right = 16, H = top + names.length * rowH + 34;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Display names seen by one loop" }, document.getElementById("loopChart"));
+  const x = i => left + (i / (L.length - 1)) * (W - left - right);
+  names.forEach((n, j) => {
+    const y = top + j * rowH + rowH / 2;
+    el("line", { x1: left, x2: W - right, y1: y, y2: y, stroke: "var(--grid)" }, svg);
+    const t = el("text", { x: left - 8, y: y + 4, "text-anchor": "end", "font-size": 11.5, fill: n === "(none)" ? "var(--muted)" : "var(--text-2)" }, svg);
+    t.textContent = n;
+  });
+  L.forEach((r, i) => {
+    const j = names.indexOf(r.name || "(none)"), y = top + j * rowH + rowH / 2;
+    const c = el("circle", { cx: x(i), cy: y, r: 4.5, fill: r.name ? "var(--s1)" : "var(--gray)", stroke: "var(--surface)", "stroke-width": 1.5 }, svg);
+    const hit = el("rect", { x: x(i) - 6, y: top, width: 12, height: names.length * rowH, fill: "transparent" }, svg);
+    hit.addEventListener("mousemove", e => { c.setAttribute("r", 6.5); showTip(e, `<b>request #${r.ctr}</b> (revision 1.${r.ctr}) · +${r.t}s<br>name: ${esc(r.name || "(none logged)")}<br>IP: ${esc(r.ip)}`); });
+    hit.addEventListener("mouseleave", () => { c.setAttribute("r", 4.5); hideTip(); });
+  });
+  const ax = top + names.length * rowH + 16;
+  [0, Math.floor(L.length / 2), L.length - 1].forEach(i => { const t = el("text", { x: x(i), y: ax, "text-anchor": "middle", "font-size": 11, fill: "var(--muted)" }, svg); t.textContent = `#${L[i].ctr} (+${L[i].t}s)`; });
+})();
+
+/* ---- generic vertical bars ---- */
+function bars(id, rows, opts) {
+  const W = 820, H = opts.h || 240, top = 22, bottom = 30, left = 48, right = 10;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria }, document.getElementById(id));
+  const max = opts.max || Math.max(...rows.map(r => r.v)) * 1.08;
+  const ih = H - top - bottom, bw = (W - left - right) / rows.length;
+  (opts.ticks || []).forEach(t => { const y = top + ih * (1 - t / max);
+    el("line", { x1: left, x2: W - right, y1: y, y2: y, stroke: "var(--grid)" }, svg);
+    const tx = el("text", { x: left - 6, y: y + 4, "text-anchor": "end", "font-size": 11, fill: "var(--muted)" }, svg); tx.textContent = opts.tfmt(t); });
+  rows.forEach((r, i) => {
+    const w = Math.max(2, bw - (opts.gap ?? 2)), x = left + i * bw + (bw - w) / 2, h = Math.max(1, ih * r.v / max), y = top + ih - h;
+    const rad = Math.min(4, w / 2);
+    const p = el("path", { d: `M${x},${top + ih} V${y + rad} Q${x},${y} ${x + rad},${y} H${x + w - rad} Q${x + w},${y} ${x + w},${y + rad} V${top + ih} Z`, fill: r.color || "var(--s1)" }, svg);
+    if (opts.labels || r.lab) { const t = el("text", { x: x + w / 2, y: y - 6, "text-anchor": "middle", "font-size": 12, fill: "var(--text)", "font-weight": 600 }, svg); t.textContent = r.lab || opts.vfmt(r.v); }
+    if (r.xl) { const t = el("text", { x: x + w / 2, y: H - 10, "text-anchor": "middle", "font-size": 11, fill: "var(--muted)" }, svg); t.textContent = r.xl; }
+    const hit = el("rect", { x: left + i * bw, y: top, width: bw, height: ih, fill: "transparent" }, svg);
+    hit.addEventListener("mousemove", e => { p.setAttribute("opacity", .8); showTip(e, r.tip); });
+    hit.addEventListener("mouseleave", () => { p.removeAttribute("opacity"); hideTip(); });
+  });
+  el("line", { x1: left, x2: W - right, y1: top + ih, y2: top + ih, stroke: "var(--border)" }, svg);
+  if (opts.ref) { const y = top + ih * (1 - opts.ref.v / max);
+    el("line", { x1: left, x2: W - right, y1: y, y2: y, stroke: "var(--text-2)", "stroke-width": 1.5, "stroke-dasharray": "5 4" }, svg);
+    const t = el("text", { x: W - right, y: y - 6, "text-anchor": "end", "font-size": 11.5, fill: "var(--text-2)" }, svg); t.textContent = opts.ref.label; }
+  return svg;
+}
+
+bars("stickyChart", D.sticky.map(s => ({ v: s.same, xl: s.bin, tip: `<b>gap ${s.bin}</b><br>${pct(s.same)} same name<br>${fmt(s.n)} pairs` })),
+  { max: 1, ticks: [0, .25, .5, .75, 1], tfmt: pct, labels: true, vfmt: pct, gap: 24, aria: "Same-name share by gap",
+    ref: { v: D.sticky_background, label: "" } });
+
+bars("rhChart", D.researchhelper.map(r => ({ v: r.n, xl: r.day, lab: r.n >= 400 ? String(r.styles) : "", tip: `<b>${r.day}</b><br>${fmt(r.n)} requests<br>${r.styles} distinct client code styles` })),
+  { ticks: [0, 500, 1000, 1500], tfmt: fmt, gap: 6, h: 210, aria: "ResearchHelper requests per day" });
+
+/* ---- cue chart (horizontal) ---- */
+(function () {
+  const order = [[true, true], [true, false], [false, true], [false, false]];
+  const rows = order.map(([a, b]) => D.cues.find(c => c.same_label === a && c.same_code === b));
+  const lab = r => `${r.same_label ? "same name" : "different name"} · ${r.same_code ? "same code" : "different code"}`;
+  const W = 820, rowH = 40, left = 230, right = 60, H = rows.length * rowH + 10;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Same-author rate by identity cue" }, document.getElementById("cueChart"));
+  const iw = W - left - right;
+  rows.forEach((r, i) => {
+    const y = 6 + i * rowH, h = 22, w = Math.max(3, iw * r.same_author);
+    el("rect", { x: left, y, width: iw, height: h, rx: 4, fill: "var(--grid)" }, svg);
+    const b = el("rect", { x: left, y, width: w, height: h, rx: 4, fill: r.same_label && r.same_code ? "var(--s1)" : (r.same_label ? "var(--s2)" : "var(--gray)") }, svg);
+    const t = el("text", { x: left - 10, y: y + 15, "text-anchor": "end", "font-size": 13, fill: "var(--text)" }, svg); t.textContent = lab(r);
+    const v = el("text", { x: left + iw + 8, y: y + 15, "font-size": 13, "font-weight": 600, fill: "var(--text)" }, svg); v.textContent = pct(r.same_author);
+    const hit = el("rect", { x: 0, y, width: W, height: h, fill: "transparent" }, svg);
+    hit.addEventListener("mousemove", e => { b.setAttribute("opacity", .8); showTip(e, `<b>${lab(r)}</b><br>${pct(r.same_author)} same signer<br>${fmt(r.pairs)} pairs`); });
+    hit.addEventListener("mouseleave", () => { b.removeAttribute("opacity"); hideTip(); });
+  });
+})();
+
+/* ---- routes: two small multiples ---- */
+(function () {
+  const host = document.getElementById("routeChart");
+  const tot = k => fmt(D.routes.reduce((a, r) => a + r[k], 0));
+  [["code", `Agents' own code (code route) · ${tot("code")} requests, 20 May – 30 June`, "var(--s1)"], ["chatgpt", `ChatGPT-User fetcher (23.98.142.176/28) · ${tot("chatgpt")} requests, 20 May – 30 June`, "var(--s2)"]].forEach(([k, title, col]) => {
+    const d = document.createElement("div"); d.id = "route_" + k; d.style.marginTop = "6px";
+    const h = document.createElement("div"); h.className = "sub"; h.textContent = title; host.appendChild(h); host.appendChild(d);
+    const max = Math.max(...D.routes.map(r => r[k]));
+    const step = max > 200000 ? 200000 : 20000;
+    const ticks = []; for (let t = 0; t <= max; t += step) ticks.push(t);
+    bars(d.id, D.routes.map((r, i) => ({ v: r[k], color: col, xl: (i % 7 === 0) ? r.day.slice(5) : "",
+      tip: `<b>${r.day}</b><br>code route: ${fmt(r.code)}<br>ChatGPT-User: ${fmt(r.chatgpt)}` })),
+      { ticks, tfmt: t => t >= 1000 ? (t / 1000) + "k" : t, gap: 2, h: 170, aria: title + " per day" });
+  });
+})();
+
+/* ---- generic horizontal bars (share 0..1) ---- */
+function hbars(id, rows, aria) {
+  const W = 820, rowH = 40, left = 260, right = 60, H = rows.length * rowH + 10;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": aria }, document.getElementById(id));
+  const iw = W - left - right;
+  rows.forEach((r, i) => {
+    const y = 6 + i * rowH, h = 22, w = Math.max(3, iw * r.v);
+    el("rect", { x: left, y, width: iw, height: h, rx: 4, fill: "var(--grid)" }, svg);
+    const b = el("rect", { x: left, y, width: w, height: h, rx: 4, fill: r.color || "var(--s1)" }, svg);
+    const t = el("text", { x: left - 10, y: y + 15, "text-anchor": "end", "font-size": 13, fill: "var(--text)" }, svg); t.textContent = r.label;
+    const v = el("text", { x: left + iw + 8, y: y + 15, "font-size": 13, "font-weight": 600, fill: "var(--text)" }, svg); v.textContent = pct(r.v);
+    const hit = el("rect", { x: 0, y, width: W, height: h, fill: "transparent" }, svg);
+    hit.addEventListener("mousemove", e => { b.setAttribute("opacity", .8); showTip(e, r.tip); });
+    hit.addEventListener("mouseleave", () => { b.removeAttribute("opacity"); hideTip(); });
+  });
+}
+hbars("nameChart", D.nameability.map(r => ({ label: r.kind, v: r.named, color: r.named > .95 ? "var(--s1)" : "var(--gray)",
+  tip: `<b>${esc(r.kind)}</b><br>${pct(r.named)} log a name<br>${fmt(r.n)} requests` })), "Name logged by request type");
+hbars("behaveChart", D.save_behaviour.rows.map((r, i) => ({ label: r.what, v: r.share, color: i === 0 ? "var(--s1)" : "var(--gray)",
+  tip: `<b>${esc(r.what)}</b><br>${pct(r.share)} of ${fmt(D.save_behaviour.n)} saves` })), "Time from name set to save");
+bars("sinceChart", D.since_set.map(s => ({ v: s.label_eq_sig, xl: s.bin, color: s.label_eq_sig > .8 ? "var(--s1)" : "var(--gray)",
+  tip: `<b>name set ${s.bin} before the save</b><br>${pct(s.label_eq_sig)} label = signature<br>${fmt(s.n)} signed edits` })),
+  { max: 1, ticks: [0, .25, .5, .75, 1], tfmt: pct, labels: true, vfmt: pct, gap: 24, aria: "Label accuracy by name age" });
+
+/* ---- tables ---- */
+function table(id, rows) {
+  const h = `<table><tr><th>time</th><th>revision</th><th>recorded name (label)</th><th>signature in text</th><th>edit summary</th><th>save-code fingerprint</th></tr>` +
+    rows.map(r => `<tr><td class="mono">${esc(r.time)}</td><td class="mono">${esc(r.rev)}</td><td>${esc(r.label)}</td><td class="hl">${esc(r.sig)}</td><td>${esc(r.summary)}</td><td class="mono" title="${esc(r.fp)}">${fpShort(r.fp)}</td></tr>`).join("") + "</table>";
+  document.getElementById(id).innerHTML = h;
+}
+const fpMap = {}; let fpN = 0;
+function fpShort(fp) { if (!(fp in fpMap)) fpMap[fp] = "code-" + String.fromCharCode(65 + (fpN++)); return fpMap[fp]; }
+table("grocTable", D.ex_grocery);
+table("janTable", D.ex_jansix);
+</script>
+</body>
+</html>

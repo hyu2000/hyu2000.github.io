@@ -9,7 +9,7 @@ the mainline. (This is another advantage of 5x5 Go: we can try to assess the gam
 In the beginning, the games are pretty random. For the C2 opening, the first concept it grasps is that C3 is pretty 
 important, leads us to the C2 C3 opening. Then it would try various moves, focuses on C2 C3 D3. For the first 4 moves,
 the two main branches are C2 C3 D3 D2 and C2 C3 D3 B3. Various patterns would emerge, shift, and maybe resurface later.
-
+    
 Below is a frequent pattern (mp8.try5 run):
 - one of the earlier openings where black wins the C2 opening is the "cut" pattern:
 C2 C3 D3 D2 D1 D4 E2 B3 E4 C4 [main_model17-75130708168.sgf](https://hyu2000.github.io/go5/view-games.html)
