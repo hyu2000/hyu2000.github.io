@@ -1,4 +1,4 @@
-# hyu2000.github.io
+# AlphaGo experiments
 My journey on AlphaGo experiments. First on 5x5 board:
 - [C2 Opening and intracacies](https://hyu2000.github.io/go5/model-evolution.html)
 - [5x5 Go complexity](https://hyu2000.github.io/go5/5x5-complexity.html)
@@ -17,3 +17,6 @@ More to come ...
 - [Computation power, efficiency](go5/compute.md)
 - [Solving Go puzzles](go5/go-puzzle-solver.md)
 - [Selfplay Evolution](go5/selfplay5-evolution.md)
+
+# The German Wiki incident investigation
+10/9/26 [Identity Crisis](DSEWiki/slop-vestigation.md)
